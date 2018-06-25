@@ -1,0 +1,129 @@
+# Rime schema settings
+# encoding: utf-8
+# date: 20180501
+
+schema:
+  schema_id: xima18
+  name: 希码输入法
+  version: "18.4"
+  author:
+    - 希明扬
+    - 希码输入法①群 <111361841>
+    - 方案设计｜单单 <37389732>
+  description: |
+    希码输入法
+  dependencies:
+    - pinyin_simp
+
+switches:
+  - name: ascii_mode
+    reset: 0
+    states: [ 中, 英 ]
+  - name: zh_trad
+    states: [ 简, 繁 ]
+    reset: 0
+  - name: full_shape
+    reset: 0
+    states: [ 半, 全 ]
+
+engine:
+  processors:
+    - ascii_composer
+    - recognizer
+    - key_binder
+    - speller
+    - punctuator
+    - selector
+    - navigator
+    - express_editor
+  segmentors:
+    - ascii_segmentor
+    - matcher
+    - affix_segmentor@pinyin
+    - abc_segmentor
+    - punct_segmentor
+    - fallback_segmentor
+  translators:
+    - punct_translator
+    - table_translator@custom_phrase
+    - table_translator
+    - script_translator@pinyin
+  filters:
+    - simplifier@tradition
+    - uniquifier
+    - reverse_lookup_filter@xima_lookup
+
+speller:
+  alphabet: 'abcdefghjiklmnopqrstuvwxyz;'
+  initials: 'abcdefghijklmnopqrstuvwxyz;'
+  delimiter: " '"
+  max_code_length: 4
+  auto_select: false #顶字上屏
+  auto_clear: manual #manual|auto|max_length 空码按下一键确认清屏|空码自动清|达到最长码时后码顶上清屏
+
+translator:
+  dictionary: xima18
+  enable_sentence: false
+  enable_user_dict: false
+  enable_charset_filter: false
+  disable_user_dict_for_patterns:
+    - "^.*$"
+  preedit_format:
+    - xform/;/~a/
+    - 'xform/^.*$/$0\t（\U$0\E）/'
+    - xform/~A/~/
+    - xform/~a/;/
+    - "xlit|QWERTYUIOPASDFGHJKLZXCVBNM~|金火上气土立宀人竹尸亽一米日古耳丁口王之又四水白月木石|"
+
+custom_phrase:
+  dictionary: ""
+  user_dict: xima18user
+  db_class: stabledb
+  enable_sentence: false
+  enable_completion: false
+  
+#abc_segmentor:
+#  extra_tags:
+#    - pinyin
+## 若开启与拼音混输删除上三行的 #
+
+pinyin:
+  tag: pinyin
+  dictionary: pinyin_simp
+  prefix: "`"
+  suffix: ";"
+  tips: 【拼音】
+  closing_tips: 【希码】
+
+tradition:
+  opencc_config: zhs2zht.ini
+  option_name: zh_trad
+  tags: [ abc ]
+  tips: all
+
+xima_lookup:
+  tags: [ abc, pinyin ]
+  dictionary: xima18
+  overwrite_comment: false
+  comment_format:
+    - "xform/$/」/"
+    - "xform/^/「/"
+
+punctuator:
+  import_preset: symbols
+
+key_binder:
+  import_preset: default
+  bindings:
+    - {accept: comma, send: 2, when: has_menu}
+    - {accept: period, send: 3, when: has_menu}
+    - {accept: slash, send: 4, when: has_menu}
+
+recognizer:
+  import_preset: default
+  patterns:
+    pinyin: "`[a-z]*'?$|[a-z]+'$"
+    punct: "^/[a-z]*$"
+
+menu:
+  page_size: 6
